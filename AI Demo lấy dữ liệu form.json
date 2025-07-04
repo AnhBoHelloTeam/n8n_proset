@@ -1,0 +1,261 @@
+{
+  "name": "AI Demo lấy dữ liệu form",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "799cb902-183a-45c2-a588-ed306a7f3fd8",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -20,
+        0
+      ],
+      "id": "c3af8b0f-c485-4ac9-ac2a-3f4eb223f0fb",
+      "name": "Webhook",
+      "webhookId": "799cb902-183a-45c2-a588-ed306a7f3fd8"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Phân tích câu sau và trả về JSON theo cấu trúc:\n{\n  \"CauHoi\": \"câu hỏi từ text đưa vào\",\n  \"Tieude\": \"Tiêu đề phản ánh vấn đề chính\",\n  \"kichthuoc\": \"Mô tả vấn đề kích thước (nếu có)\",\n  \"chiphi\": \"Mô tả vấn đề giá cả/chi phí\",\n  \"doitra\": \"Mô tả chính sách đổi trả\",\n  \"khuyenmai\": \"Thông tin khuyến mãi (nếu có)\"\n}\n\nCâu hỏi: {{ $('Webhook').item.json.body.text }}",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        200,
+        0
+      ],
+      "id": "fc73ec1d-d217-47a0-a0ed-e96e0374b6d1",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-exp",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        180,
+        180
+      ],
+      "id": "68036c40-6203-4810-91b9-b229001aa1a6",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "V5n6W3cGy7odkeGI",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"CauHoi\":\"CauHoi\",\n  \"Tieude\":\"Tieude\",\n\t\"kichthuoc\":\"kichthuoc\",\n    \"chiphi\":\"chiphi\",\n    \"doitra\":\"doitra\",\n  \"khuyenmai\":\"khuyenmai\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        440,
+        220
+      ],
+      "id": "5f3bb306-d42a-46b0-a6e7-7f33cdb0f1dd",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"Tieude\":\"Tieude\",\n  \"vande\":[\"vande1\",\"vande2\",\"vande3\",\"vande4\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        200
+      ],
+      "id": "17edf6b7-6dff-409a-a7ba-07f2a23444f7",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "10CdRcxMwIG1Hwje4A1ndFDWCpIHUdNbRetbY7wjDRMw",
+          "mode": "list",
+          "cachedResultName": "Phản hồi khách hàng",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10CdRcxMwIG1Hwje4A1ndFDWCpIHUdNbRetbY7wjDRMw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2029894500,
+          "mode": "list",
+          "cachedResultName": "Trang tính1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10CdRcxMwIG1Hwje4A1ndFDWCpIHUdNbRetbY7wjDRMw/edit#gid=2029894500"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "TIêu đề ": "={{ $('Basic LLM Chain').item.json.output.Tieude }}",
+            "Kích thước": "={{ $('Basic LLM Chain').item.json.output.kichthuoc }}",
+            "Chi phí": "={{ $('Basic LLM Chain').item.json.output.chiphi }}",
+            "Đổi trả": "={{ $('Basic LLM Chain').item.json.output.doitra }}",
+            "Khuyến mãi": "={{ $('Basic LLM Chain').item.json.output.khuyenmai }}",
+            "Câu hỏi khách hàng": "={{ $('Basic LLM Chain').item.json.output.CauHoi }}"
+          },
+          "matchingColumns": [
+            "output"
+          ],
+          "schema": [
+            {
+              "id": "Câu hỏi khách hàng",
+              "displayName": "Câu hỏi khách hàng",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TIêu đề ",
+              "displayName": "TIêu đề ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Kích thước",
+              "displayName": "Kích thước",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Chi phí",
+              "displayName": "Chi phí",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Đổi trả",
+              "displayName": "Đổi trả",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Khuyến mãi",
+              "displayName": "Khuyến mãi",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        560,
+        0
+      ],
+      "id": "5a473288-afab-4720-8315-79bd8758d740",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XxLD1J2M5AIUzkZa",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4df186db-7a75-40cc-8da9-2acdfb134508",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "43ad8c82b8ba187743b9c2d123fcb9ded2b9e1871418de904628baa72cbf75bb"
+  },
+  "id": "Qz3aoHnhfrAvBEoj",
+  "tags": []
+}

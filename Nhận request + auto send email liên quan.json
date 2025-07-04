@@ -1,0 +1,584 @@
+{
+  "name": "email marketing automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        -700,
+        180
+      ],
+      "id": "accbde2c-8249-4c82-ab55-bd39cb6ab09f"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$('Read Contacts').item.json['Trạng thái']}}",
+              "value2": "Chưa gửi"
+            }
+          ]
+        }
+      },
+      "name": "Filter Emails",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        -120
+      ],
+      "id": "f5d95c37-eea5-45e4-8124-3e088e5bb262"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0",
+          "mode": "list",
+          "cachedResultName": "Email_Marketing_Automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Contacts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -300,
+        -120
+      ],
+      "id": "31bde3fa-e432-4fa3-9c7a-0452cf6c80d6",
+      "name": "Read Contacts",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XxLD1J2M5AIUzkZa",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0",
+          "mode": "list",
+          "cachedResultName": "Email_Marketing_Automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 420214750,
+          "mode": "list",
+          "cachedResultName": "Templates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0/edit#gid=420214750"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -40,
+        220
+      ],
+      "id": "b0ecc8f2-57a8-45f1-ab56-2f886d33c5e6",
+      "name": "Read Templates",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XxLD1J2M5AIUzkZa",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date(new Date().toLocaleString(\"en-US\", { timeZone: \"Asia/Ho_Chi_Minh\" }));\n\nreturn items.filter(item => {\n  const sendTimeRaw = item.json[\"Thời gian gửi (YYYY-MM-DD HH:MM)\"];\n  if (!sendTimeRaw) return false;\n\n  const sendTime = new Date(sendTimeRaw.replace(\" \", \"T\"));\n  const status = item.json[\"Trạng thái\"]?.trim().toLowerCase();\n\n  return sendTime <= now && status === \"chưa gửi\";\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        20,
+        -120
+      ],
+      "id": "6e51d482-e1b6-4910-9b73-f400b0a5d22d",
+      "name": "Code",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputItems = $input.all()[0].json ? $input.all() : $input.all()[0].items;\n\nconst recipients = inputItems.filter(i => i.json?.Email);\nconst templates = inputItems.filter(i => i.json?.[\"Tiêu đề email\"]);\n\nif (!recipients.length || !templates.length) {\n  throw new Error(\"Không tìm thấy dữ liệu người nhận hoặc template.\");\n}\n\nconst merged = recipients.map(r => {\n  const template = templates.find(t => t.json[\"Loại email\"] === r.json[\"Loại email\"]);\n  if (!template) return null;\n\n  const content = template.json[\"Nội dung email\"].replace(\"{{Tên}}\", r.json[\"Tên\"]);\n\n  // Lấy thông tin chi tiết (Xem thêm) và chuyển nó thành đường link HTML\n  const detailedInfo = template.json[\"Thông tin chi tiết\"];\n  \n  // Nếu có thông tin chi tiết và có dạng [Xem thêm](link), chuyển đổi thành thẻ <a>\n  let detailedLinkHtml = \"\";\n  if (detailedInfo) {\n    const regex = /\\[Xem thêm\\]\\((https?:\\/\\/[^\\s]+)\\)/;\n    const match = detailedInfo.match(regex);\n    if (match) {\n      const url = match[1];  // Lấy URL từ phần regex\n      detailedLinkHtml = `<a href=\"${url}\" target=\"_blank\">Xem thêm</a>`;\n    } else {\n      detailedLinkHtml = \"Không có đường link chi tiết.\";\n    }\n  }\n\n  return {\n    json: {\n      ...r.json,\n      \"Tiêu đề email\": template.json[\"Tiêu đề email\"],\n      \"Nội dung email\": content,\n      \"Thông tin chi tiết\": detailedLinkHtml // Gán đường link HTML vào phần Thông tin chi tiết\n    }\n  };\n}).filter(Boolean); // Loại bỏ các bản ghi null nếu không khớp\n\nreturn merged;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        200
+      ],
+      "id": "fc50d115-416d-4ff4-bc69-9555751858fe",
+      "name": "Code1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        340,
+        200
+      ],
+      "id": "1de6af69-54dd-4d7d-a739-70e265519064",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Code1').item.json.Email }}",
+        "subject": "={{ $('Code1').item.json['Tiêu đề email'] }}",
+        "message": "={{ $('Code1').item.json['Nội dung email'] }}<br />\nXem thông tin chi tiết tại đây!!<br />\n{{ $('Code1').item.json['Thông tin chi tiết'] }}<br />\n<img src=\"https://i.pinimg.com/474x/36/de/c4/36dec411f6ff28500e0bf65aa79d58de.jpg\" />\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        820,
+        200
+      ],
+      "id": "82c2303d-1d69-42a6-930c-c3637ec9dae4",
+      "name": "Gmail",
+      "webhookId": "69a56ceb-526e-4bd6-8f11-8de190676a1b",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "wlvmQ3b7WHkBZkOP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0",
+          "mode": "list",
+          "cachedResultName": "Email_Marketing_Automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Contacts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Code2').item.json.row_number }}",
+            "Trạng thái": "={{ $('Code2').item.json['Trạng thái'] }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Tên",
+              "displayName": "Tên",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Thời gian gửi (YYYY-MM-DD HH:MM)",
+              "displayName": "Thời gian gửi (YYYY-MM-DD HH:MM)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Loại email",
+              "displayName": "Loại email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Trạng thái",
+              "displayName": "Trạng thái",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        900,
+        460
+      ],
+      "id": "5edb5116-524f-48fb-93ad-499dd229774d",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XxLD1J2M5AIUzkZa",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Code trong Function Node (đặt sau Gmail node)\nconst sentEmails = $input.all();\n\nreturn sentEmails.map(email => ({\n  json: {\n    row_number: email.json.row_number, // KEY để xác định dòng\n    \"Trạng thái\": \"Đã gửi\",\n    \"Message ID\": email.json.id, // Lưu ID email từ Gmail\n    \"Ngày gửi thực tế\": new Date().toISOString()\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        460
+      ],
+      "id": "5963eb21-04b9-4ec4-ae7c-92a537d4c325",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        460,
+        460
+      ],
+      "id": "7aed0984-5eff-426c-b950-f40df578a978",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3f37df5b-58ae-43f9-ba24-a29cd7ab42ac",
+              "leftValue": "={{$('Code').item.json}}",
+              "rightValue": "0",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        360,
+        -120
+      ],
+      "id": "5c665970-3451-4b6f-a984-fbdfd5d475f0",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Không có người nhận email nào cần gửi. Dừng workflow."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        560,
+        -120
+      ],
+      "id": "2f48f520-740b-4b5a-838e-b37399e8afc8",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "content": "Lấy danh sách khách hàng + lọc lấy users ở trạng thái \"Chưa gửi\".\n\nFunction code xử lý lọc users có time (ngày, giờ gửi) <= Time thực\n\n==> request trả về sẽ là những ng dùng đạt DK (ngày,giờ gửi <= time thực + trạng thái \"Chưa gửi\")",
+        "height": 380,
+        "width": 580
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -340,
+        -300
+      ],
+      "typeVersion": 1,
+      "id": "828d2d8e-f7c8-4620-9a66-61df360f6735",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Lọc trường hợp rỗng ( không có người chưa gửi hoặc ngày giờ chưa đủ DK)\n\n==> Sẽ catch lỗi ngay và dừng luôn tránh phí tài nguyên",
+        "height": 320,
+        "width": 480,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        300,
+        -280
+      ],
+      "typeVersion": 1,
+      "id": "d52ad985-ccd0-496c-a054-0f16b01149aa",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "MẪU CHO CÁC REQUEST USERS TRẢ VỀ\n\n\nNgười dùng Dki => xếp vào loại chào mừng \n\nUSERS TỪNG MUA SP => KHUYẾN MÃI\n\nUSERS THANH TOÁN THÀNH CÔNG => CAMON",
+        "height": 280,
+        "width": 600
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1060,
+        -220
+      ],
+      "typeVersion": 1,
+      "id": "cf52ab2b-7be1-4275-985b-c0edd9edb087",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Template - nội dung gửi List",
+        "height": 280,
+        "width": 280
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -160,
+        120
+      ],
+      "typeVersion": 1,
+      "id": "2394ed1e-2ad1-4c15-a9d5-b4b41e6da872",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "Gốp dữ liệu dựa trên Phân loại email",
+        "height": 260,
+        "width": 420,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        260,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "dca7b354-01d1-4d50-8549-56efd313d8a3",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule": {
+      "main": [
+        [
+          {
+            "node": "Read Contacts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Templates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Contacts": {
+      "main": [
+        [
+          {
+            "node": "Filter Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Templates": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Filter Emails": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cb9231cc-516b-4131-9d7a-5c9e344c11a7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "43ad8c82b8ba187743b9c2d123fcb9ded2b9e1871418de904628baa72cbf75bb"
+  },
+  "id": "VhPJSV3rRCy6qNha",
+  "tags": []
+}

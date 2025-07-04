@@ -1,0 +1,697 @@
+{
+  "name": "email marketing automation 2",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        -760,
+        260
+      ],
+      "id": "64afd2d5-7511-41a7-ab12-30d843569e4c"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0",
+          "mode": "list",
+          "cachedResultName": "Email_Marketing_Automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 350958418,
+          "mode": "list",
+          "cachedResultName": "Contacts1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0/edit#gid=350958418"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -460,
+        20
+      ],
+      "id": "0938421a-6fe9-457d-bc1b-e6370ed2e8de",
+      "name": "Read Contacts",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XxLD1J2M5AIUzkZa",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0",
+          "mode": "list",
+          "cachedResultName": "Email_Marketing_Automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 54227260,
+          "mode": "list",
+          "cachedResultName": "Templates1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0/edit#gid=54227260"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -100,
+        300
+      ],
+      "id": "82200959-aec4-4d34-8484-28c007c565aa",
+      "name": "Read Templates",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XxLD1J2M5AIUzkZa",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1000,
+        280
+      ],
+      "id": "c9721b42-75f9-4d7d-9fcc-5162e68a0200",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gộp data theo \"bước hiện tại\"').item.json.Email }}",
+        "subject": "={{ $('Gộp data theo \"bước hiện tại\"').item.json['Tiêu đề email'] }}",
+        "message": "={{ $('Gộp data theo \"bước hiện tại\"').item.json['Nội dung email'] }}<br />\nXem thông tin chi tiết tại đây!!<br />\n{{ $('Gộp data theo \"bước hiện tại\"').item.json['Thông tin chi tiết'] }}<br />\n<img src=\"https://i.pinimg.com/474x/36/de/c4/36dec411f6ff28500e0bf65aa79d58de.jpg\" />\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1560,
+        280
+      ],
+      "id": "481ac68e-3b5e-4f56-a9b6-219813061a28",
+      "name": "Gmail",
+      "webhookId": "69a56ceb-526e-4bd6-8f11-8de190676a1b",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "wlvmQ3b7WHkBZkOP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0",
+          "mode": "list",
+          "cachedResultName": "Email_Marketing_Automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 350958418,
+          "mode": "list",
+          "cachedResultName": "Contacts1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0/edit#gid=350958418"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Xử lý gửi tin, thông báo ngày gửi và dự kiến').item.json.row_number }}",
+            "Ngày gửi gần nhất": "={{ $('Xử lý gửi tin, thông báo ngày gửi và dự kiến').item.json['Ngày gửi gần nhất'] }}",
+            "Bước hiện tại": "={{ $('Xử lý gửi tin, thông báo ngày gửi và dự kiến').item.json['Bước hiện tại'] }}",
+            "Trạng thái": "={{ $('Xử lý gửi tin, thông báo ngày gửi và dự kiến').item.json['Trạng thái'] }}",
+            "Ngày gửi tiếp theo": "={{ $('Xử lý gửi tin, thông báo ngày gửi và dự kiến').item.json['Ngày gửi tiếp theo'] }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Tên",
+              "displayName": "Tên",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Thời gian gửi (YYYY-MM-DD HH:MM)",
+              "displayName": "Thời gian gửi (YYYY-MM-DD HH:MM)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Bước hiện tại",
+              "displayName": "Bước hiện tại",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Trạng thái",
+              "displayName": "Trạng thái",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ngày gửi gần nhất",
+              "displayName": "Ngày gửi gần nhất",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ngày gửi tiếp theo",
+              "displayName": "Ngày gửi tiếp theo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1500,
+        540
+      ],
+      "id": "1912124d-37f0-4a1e-9714-beca8bf844f6",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XxLD1J2M5AIUzkZa",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1060,
+        540
+      ],
+      "id": "459d54e5-d021-4666-be44-6f4e8dc4575a",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Không có người nhận email nào cần gửi. Dừng workflow."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1160,
+        20
+      ],
+      "id": "d59c829c-d275-4a83-8f5f-4f85eafdb2b1",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date(new Date().toLocaleString(\"en-US\", { timeZone: \"Asia/Ho_Chi_Minh\" }));\nconst todayStr = now.toISOString().slice(0, 10); // \"2025-06-18\"\n\nreturn items.map(item => {\n  const nextSendRaw = item.json[\"Ngày gửi tiếp theo\"];\n  const status = item.json[\"Trạng thái\"]?.trim().toLowerCase();\n\n  // Nếu trạng thái là \"Đã gửi\" và đã đến ngày gửi tiếp theo => reset lại trạng thái\n  if (status === \"đã gửi\" && nextSendRaw) {\n    const nextSendDate = new Date(nextSendRaw.replace(\" \", \"T\"));\n    const nextSendStr = nextSendDate.toISOString().slice(0, 10);\n\n    if (nextSendStr <= todayStr) {\n      item.json[\"Trạng thái\"] = \"Chưa gửi\";\n    }\n  }\n\n  return item;\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        20
+      ],
+      "id": "7ce9fe54-3d08-4379-86a7-734798a5156a",
+      "name": "Reset trạng thái mỗi ngày"
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date(new Date().toLocaleString(\"en-US\", { timeZone: \"Asia/Ho_Chi_Minh\" }));\n\nreturn items.filter(item => {\n  const sendTimeRaw = item.json[\"Thời gian gửi (YYYY-MM-DD HH:MM)\"];\n  if (!sendTimeRaw) return false;\n\n  const sendTime = new Date(sendTimeRaw.replace(\" \", \"T\"));\n  const status = item.json[\"Trạng thái\"]?.trim().toLowerCase();\n\n  return sendTime <= now && status === \"chưa gửi\";\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        740,
+        20
+      ],
+      "id": "78b9e306-35fa-4921-b531-5c6f103d68a6",
+      "name": "Lọc ngày gửi",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$('Read Contacts').item.json['Trạng thái']}}",
+              "value2": "Chưa gửi"
+            }
+          ]
+        }
+      },
+      "name": "Find \"Chưa gửi\"",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        480,
+        20
+      ],
+      "id": "996cab44-2863-4d6f-8349-d0cb3887deec"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3f37df5b-58ae-43f9-ba24-a29cd7ab42ac",
+              "leftValue": "={{$('Lọc ngày gửi').item.json}}",
+              "rightValue": "0",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        940,
+        20
+      ],
+      "id": "37c4661c-bee2-4298-98d9-b59bc76a3a7a",
+      "name": "Catch nếu rỗng"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputItems = $input.all();\n\nconst contacts = inputItems.filter(i => i.json?.Email);\nconst templates = inputItems.filter(i => i.json?.[\"Loại email\"]);\n\nif (!contacts.length || !templates.length) {\n  throw new Error(\"Không tìm thấy dữ liệu người nhận hoặc template.\");\n}\n\nconst merged = contacts.map(contact => {\n  const step = contact.json[\"Bước hiện tại\"];\n  const emailType = `Ngày ${step}`;\n  \n  // Tìm template khớp loại email\n  const template = templates.find(t => t.json[\"Loại email\"] === emailType);\n  if (!template) return null;\n\n  // Cá nhân hóa nội dung\n  let content = template.json[\"Nội dung email\"];\n  content = content.replace(/{{Tên}}/g, contact.json[\"Tên\"]);\n\n  // Chuyển link dạng [Xem thêm](url) thành thẻ HTML\n  const detail = template.json[\"Thông tin chi tiết\"];\n  let detailHtml = \"\";\n  if (detail) {\n    const match = detail.match(/\\[.*?\\]\\((https?:\\/\\/[^\\s]+)\\)/);\n    if (match) {\n      const url = match[1];\n      detailHtml = `<a href=\"${url}\" target=\"_blank\">Xem thêm</a>`;\n    }\n  }\n\n  return {\n    json: {\n      ...contact.json,\n      \"Tiêu đề email\": template.json[\"Tiêu đề email\"],\n      \"Nội dung email\": content,\n      \"Thông tin chi tiết\": detailHtml\n    }\n  };\n}).filter(Boolean);\n\nreturn merged;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1260,
+        280
+      ],
+      "id": "5279a7a9-f4e9-41be-a67d-67612f09e76e",
+      "name": "Gộp data theo \"bước hiện tại\"",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lấy thời gian hiện tại theo giờ Việt Nam\nconst sentAt = new Date(new Date().toLocaleString(\"en-US\", { timeZone: \"Asia/Ho_Chi_Minh\" }));\n\n// Tạo ngày gửi tiếp theo bằng cách cộng 1 ngày\nconst getNextSendTime = (date) => {\n  const next = new Date(date);\n  next.setDate(next.getDate() + 1);\n  return next.toISOString().slice(0, 16).replace(\"T\", \" \");\n};\n\nreturn $input.all().map(item => {\n  const json = item.json;\n\n  const ngayGuiGanNhat = sentAt.toISOString().slice(0, 16).replace(\"T\", \" \");\n  const ngayGuiTiepTheo = getNextSendTime(sentAt);\n\n  return {\n    json: {\n      ...json,\n      \"Trạng thái\": \"Đã gửi\",\n      \"Ngày gửi gần nhất\": ngayGuiGanNhat,\n      \"Ngày gửi tiếp theo\": ngayGuiTiepTheo,\n      \"Bước hiện tại\": parseInt(json[\"Bước hiện tại\"]) + 1\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        540
+      ],
+      "id": "facf040a-1c19-4fa2-8813-b770a4f561c7",
+      "name": "Xử lý gửi tin, thông báo ngày gửi và dự kiến"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0",
+          "mode": "list",
+          "cachedResultName": "Email_Marketing_Automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 350958418,
+          "mode": "list",
+          "cachedResultName": "Contacts1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UoNB3ZonavtOP4L68TTboTmIMHCRth2W4zlQ4A2j8D0/edit#gid=350958418"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "Trạng thái": "={{$('Reset trạng thái mỗi ngày').item.json['Trạng thái']}}",
+            "Email": "={{ $json.Email }}",
+            "Tên": "={{ $json[\"Tên\"] }}",
+            "Thời gian gửi (YYYY-MM-DD HH:MM)": "={{ $json[\"Thời gian gửi (YYYY-MM-DD HH:MM)\"] }}",
+            "Bước hiện tại": "={{ $json[\"Bước hiện tại\"] }}",
+            "Ngày gửi gần nhất": "={{ $json[\"Ngày gửi gần nhất\"] }}",
+            "Ngày gửi tiếp theo": "={{ $json[\"Ngày gửi tiếp theo\"] }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tên",
+              "displayName": "Tên",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Thời gian gửi (YYYY-MM-DD HH:MM)",
+              "displayName": "Thời gian gửi (YYYY-MM-DD HH:MM)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Bước hiện tại",
+              "displayName": "Bước hiện tại",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Trạng thái",
+              "displayName": "Trạng thái",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ngày gửi gần nhất",
+              "displayName": "Ngày gửi gần nhất",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Ngày gửi tiếp theo",
+              "displayName": "Ngày gửi tiếp theo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        40,
+        20
+      ],
+      "id": "a8e6b39c-9a13-487e-8d1c-32703b72685d",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XxLD1J2M5AIUzkZa",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule": {
+      "main": [
+        [
+          {
+            "node": "Read Contacts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Templates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Contacts": {
+      "main": [
+        [
+          {
+            "node": "Reset trạng thái mỗi ngày",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Templates": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Gộp data theo \"bước hiện tại\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Xử lý gửi tin, thông báo ngày gửi và dự kiến",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reset trạng thái mỗi ngày": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lọc ngày gửi": {
+      "main": [
+        [
+          {
+            "node": "Catch nếu rỗng",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find \"Chưa gửi\"": {
+      "main": [
+        [
+          {
+            "node": "Lọc ngày gửi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Catch nếu rỗng": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gộp data theo \"bước hiện tại\"": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Xử lý gửi tin, thông báo ngày gửi và dự kiến": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets1": {
+      "main": [
+        [
+          {
+            "node": "Find \"Chưa gửi\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ee756279-5b48-4070-803a-44d2ce87da6e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "43ad8c82b8ba187743b9c2d123fcb9ded2b9e1871418de904628baa72cbf75bb"
+  },
+  "id": "W6EjYhAPDHXiPC1f",
+  "tags": []
+}
